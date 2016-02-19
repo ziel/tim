@@ -1,6 +1,9 @@
 package view
 
-import "github.com/jroimartin/gocui"
+import (
+	"github.com/nsf/termbox-go"
+	"github.com/ziel/tim/model"
+)
 
 type threeUpLayout struct {
 	left  viewDescr
@@ -16,6 +19,23 @@ func newThreeUpLayout() *threeUpLayout {
 	}
 }
 
+type threeUp struct {
+	model *model.Three
+}
+
+// todo: docs
+func (u3 *threeUp) Draw() {
+	// todo: impl redraw
+	termbox.Flush()
+}
+
+// todo: docs
+func (u3 *threeUp) Resize(event *termbox.Event) error {
+	// todo: impl
+	return nil
+}
+
+// todo: docs
 func (l *threeUpLayout) Update(maxX, maxY int) {
 	l.left.X0 = 0
 	l.left.Y0 = 0
@@ -31,9 +51,4 @@ func (l *threeUpLayout) Update(maxX, maxY int) {
 	l.right.Y0 = 0
 	l.right.X1 = maxX - 1
 	l.right.Y1 = maxY - 1
-}
-
-func (l *threeUpLayout) Handler(ui *gocui.Gui) error {
-	l.Update(ui.Size())
-	return placeViews(ui, l.left, l.mid, l.right)
 }

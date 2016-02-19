@@ -1,4 +1,4 @@
 package: github.com/ziel/tim
 import:
-- package: github.com/jroimartin/gocui
 - package: github.com/sergi/go-diff
+- package: github.com/nsf/termbox-go
