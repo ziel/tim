@@ -28,7 +28,7 @@ func (u2 *twoUp) Draw() {
 }
 
 // todo: docs
-func (u2 *twoUp) Resize(event *termbox.Event) error {
+func (u2 *twoUp) Resize(event termbox.Event) error {
 	// todo: impl
 	return nil
 }

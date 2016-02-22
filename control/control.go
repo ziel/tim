@@ -4,7 +4,7 @@ package control
 
 import (
 	"errors"
-	"log"
+	"sync"
 
 	"github.com/nsf/termbox-go"
 	"github.com/ziel/tim/model"
@@ -47,43 +47,69 @@ func startTermbox() {
 
 // todo: docs
 func eventloop() error {
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	events := eventProducer(wg.Done)
+	result := eventConsumer(wg.Done, events)
+
+	wg.Wait()
+	return <-result
+}
+
+// todo: docs
+func eventProducer(done func()) <-chan termbox.Event {
 	const bufsize int = 10
 	events := make(chan termbox.Event, bufsize)
 
 	go func() {
+		defer done()
+
 		for {
 			ev := termbox.PollEvent()
-
 			if ev.Type == termbox.EventInterrupt {
-				log.Println("EXIT")
 				return
 			}
-
 			events <- ev
 		}
 	}()
 
-	for {
-		select {
-		case event := <-events:
-			if err := handle(&event); err != nil {
-				switch err {
-				case errQuit:
-					termbox.Interrupt()
-					return nil
-				}
-				return err
-			}
-		}
-
-		currentView.Draw()
-	}
-
-	return nil
+	return events
 }
 
 // todo: docs
-func handle(event *termbox.Event) error {
+func eventConsumer(done func(), events <-chan termbox.Event) <-chan error {
+	result := make(chan error)
+
+	go func() {
+		defer done()
+
+		for {
+			currentView.Draw()
+			err := handle(<-events)
+
+			if err == nil {
+				continue
+			}
+
+			switch err {
+			case errQuit:
+				close(result)
+				termbox.Interrupt()
+
+			default:
+				result <- err
+			}
+
+			return
+		}
+	}()
+
+	return result
+}
+
+// todo: docs
+func handle(event termbox.Event) error {
 	switch event.Type {
 	case termbox.EventKey:
 		return key(event)
@@ -99,7 +125,7 @@ func handle(event *termbox.Event) error {
 }
 
 // todo: docs
-func key(event *termbox.Event) error {
+func key(event termbox.Event) error {
 	switch event.Key {
 	case termbox.KeyCtrlC:
 		return errQuit

@@ -16,7 +16,7 @@ type View interface {
 	Draw()
 
 	// todo: docs
-	Resize(*termbox.Event) error
+	Resize(termbox.Event) error
 }
 
 // todo: docs

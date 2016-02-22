@@ -30,7 +30,7 @@ func (u3 *threeUp) Draw() {
 }
 
 // todo: docs
-func (u3 *threeUp) Resize(event *termbox.Event) error {
+func (u3 *threeUp) Resize(event termbox.Event) error {
 	// todo: impl
 	return nil
 }
