@@ -22,9 +22,9 @@ type View interface {
 // todo: docs
 func Factory(m model.Model) (View, error) {
 	switch v := m.(type) {
-	case *model.Two:
+	case *model.TwoUp:
 		return &twoUp{model: v}, nil
-	case *model.Three:
+	case *model.ThreeUp:
 		return &threeUp{model: v}, nil
 	}
 

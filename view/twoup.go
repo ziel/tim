@@ -18,7 +18,7 @@ func newTwoUpLayout() *twoUpLayout {
 }
 
 type twoUp struct {
-	model *model.Two
+	model *model.TwoUp
 }
 
 // todo: docs

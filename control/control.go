@@ -3,11 +3,11 @@
 package control
 
 import (
-	"errors"
 	"sync"
 
 	"github.com/nsf/termbox-go"
 	"github.com/ziel/tim/model"
+	"github.com/ziel/tim/timerror"
 	"github.com/ziel/tim/view"
 )
 
@@ -43,9 +43,6 @@ func Init(paths []string) error {
 	controller.init()
 	return nil
 }
-
-// todo: docs
-var errQuit = errors.New("Quit")
 
 // todo: docs
 func (s *state) init() {
@@ -104,7 +101,7 @@ func (s *state) eventConsumer(events <-chan termbox.Event) <-chan error {
 
 			if err := s.handle(<-events); err != nil {
 				switch err {
-				case errQuit:
+				case timerror.Quit:
 					close(result)
 					termbox.Interrupt()
 
@@ -131,21 +128,6 @@ func (s *state) handle(event termbox.Event) error {
 
 	case termbox.EventError:
 		return event.Err
-	}
-
-	return nil
-}
-
-// todo: docs
-func (s *state) key(event termbox.Event) error {
-	switch event.Key {
-	case termbox.KeyCtrlC:
-		return errQuit
-	}
-
-	switch event.Ch {
-	case 'q':
-		return errQuit
 	}
 
 	return nil

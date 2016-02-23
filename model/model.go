@@ -1,50 +1,26 @@
+// todo: docs
+//
 package model
 
-import "fmt"
+import "github.com/ziel/tim/timerror"
 
 // todo: docs
 type Model interface {
 	FilePaths() []string
+	MergeRight() error
+	MergeLeft() error
 }
 
-type Two struct {
-	filePaths [2]string
-}
-
-func newTwo(path1, path2 string) *Two {
-	return &Two{
-		filePaths: [2]string{path1, path2},
-	}
-}
-
-func (dm *Two) FilePaths() []string {
-	return dm.filePaths[:]
-}
-
-type Three struct {
-	filePaths [3]string
-}
-
-func newThree(path1, path2, path3 string) *Three {
-	return &Three{
-		filePaths: [3]string{path1, path2, path3},
-	}
-}
-
-func (tm *Three) FilePaths() []string {
-	return tm.filePaths[:]
-}
-
+// todo: docs
 func Factory(files []string) (Model, error) {
-
 	switch len(files) {
 	case 0, 1:
-		return nil, fmt.Errorf("%s\n", "I need at least 2 files to compare.")
+		return nil, timerror.TooFewFiles
 	case 2:
-		return newTwo(files[0], files[1]), nil
+		return NewTwoUp(files[0], files[1]), nil
 	case 3:
-		return newThree(files[0], files[1], files[2]), nil
+		return NewThreeUp(files[0], files[1], files[2]), nil
 	}
 
-	return nil, fmt.Errorf("%s\n", "I can't compare more than 3 files.")
+	return nil, timerror.TooManyFiles
 }

@@ -20,7 +20,7 @@ func newThreeUpLayout() *threeUpLayout {
 }
 
 type threeUp struct {
-	model *model.Three
+	model *model.ThreeUp
 }
 
 // todo: docs
