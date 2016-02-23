@@ -11,18 +11,36 @@ import (
 	"github.com/ziel/tim/view"
 )
 
-var currentView view.View
+// todo: docs
+type state struct {
+	model model.Model
+	view  view.View
+	wg    sync.WaitGroup
+}
 
 // todo: docs
-func Init(m model.Model) error {
-	var err error
-	currentView, err = view.Factory(m)
+var controller *state
+
+// todo: docs
+func Init(paths []string) error {
+	cModel, err := model.Factory(paths)
 
 	if err != nil {
 		return err
 	}
 
-	startTermbox()
+	cView, err := view.Factory(cModel)
+
+	if err != nil {
+		return err
+	}
+
+	controller = &state{
+		model: cModel,
+		view:  cView,
+	}
+
+	controller.init()
 	return nil
 }
 
@@ -30,7 +48,7 @@ func Init(m model.Model) error {
 var errQuit = errors.New("Quit")
 
 // todo: docs
-func startTermbox() {
+func (s *state) init() {
 	if err := termbox.Init(); err != nil {
 		panic(err)
 	}
@@ -38,32 +56,29 @@ func startTermbox() {
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputAlt)
 
-	currentView.Draw()
-
-	if err := eventloop(); err != nil {
+	if err := s.eventLoop(); err != nil {
 		panic(err)
 	}
 }
 
 // todo: docs
-func eventloop() error {
-	var wg sync.WaitGroup
-	wg.Add(2)
+func (s *state) eventLoop() error {
+	s.wg.Add(2)
 
-	events := eventProducer(wg.Done)
-	result := eventConsumer(wg.Done, events)
+	events := s.eventProducer()
+	result := s.eventConsumer(events)
 
-	wg.Wait()
+	s.wg.Wait()
 	return <-result
 }
 
 // todo: docs
-func eventProducer(done func()) <-chan termbox.Event {
+func (s *state) eventProducer() <-chan termbox.Event {
 	const bufsize int = 10
 	events := make(chan termbox.Event, bufsize)
 
 	go func() {
-		defer done()
+		defer s.wg.Done()
 
 		for {
 			ev := termbox.PollEvent()
@@ -78,30 +93,27 @@ func eventProducer(done func()) <-chan termbox.Event {
 }
 
 // todo: docs
-func eventConsumer(done func(), events <-chan termbox.Event) <-chan error {
+func (s *state) eventConsumer(events <-chan termbox.Event) <-chan error {
 	result := make(chan error)
 
 	go func() {
-		defer done()
+		defer s.wg.Done()
 
 		for {
-			currentView.Draw()
-			err := handle(<-events)
+			s.view.Draw()
 
-			if err == nil {
-				continue
+			if err := s.handle(<-events); err != nil {
+				switch err {
+				case errQuit:
+					close(result)
+					termbox.Interrupt()
+
+				default:
+					result <- err
+				}
+
+				return
 			}
-
-			switch err {
-			case errQuit:
-				close(result)
-				termbox.Interrupt()
-
-			default:
-				result <- err
-			}
-
-			return
 		}
 	}()
 
@@ -109,13 +121,13 @@ func eventConsumer(done func(), events <-chan termbox.Event) <-chan error {
 }
 
 // todo: docs
-func handle(event termbox.Event) error {
+func (s *state) handle(event termbox.Event) error {
 	switch event.Type {
 	case termbox.EventKey:
-		return key(event)
+		return s.key(event)
 
 	case termbox.EventResize:
-		return currentView.Resize(event)
+		return s.view.Resize(event)
 
 	case termbox.EventError:
 		return event.Err
@@ -125,7 +137,7 @@ func handle(event termbox.Event) error {
 }
 
 // todo: docs
-func key(event termbox.Event) error {
+func (s *state) key(event termbox.Event) error {
 	switch event.Key {
 	case termbox.KeyCtrlC:
 		return errQuit

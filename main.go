@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/ziel/tim/control"
-	"github.com/ziel/tim/model"
 )
 
 func handleArgs() []string {
@@ -27,17 +26,9 @@ func handleArgs() []string {
 
 func main() {
 	errlog := log.New(os.Stderr, "Erp! ", 0)
-	filePaths := handleArgs()
+	paths := handleArgs()
 
-	m, err := model.Factory(filePaths)
-
-	if err != nil {
+	if err := control.Init(paths); err != nil {
 		errlog.Fatal(err)
-	}
-
-	cerr := control.Init(m)
-
-	if cerr != nil {
-		errlog.Fatal(cerr)
 	}
 }
