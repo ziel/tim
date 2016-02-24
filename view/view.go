@@ -3,8 +3,6 @@
 package view
 
 import (
-	"fmt"
-
 	"github.com/nsf/termbox-go"
 	"github.com/ziel/tim/model"
 )
@@ -21,12 +19,18 @@ type View interface {
 
 // todo: docs
 func Factory(m model.Model) (View, error) {
-	switch v := m.(type) {
-	case *model.TwoUp:
-		return &twoUp{model: v}, nil
-	case *model.ThreeUp:
-		return &threeUp{model: v}, nil
+	paths := m.FilePaths()
+
+	total := len(paths)
+	elems := make([]Element, total*2-1)
+
+	for i, path := range paths {
+		elems = append(elems, NewTextPane(path))
+
+		if i < total {
+			elems = append(elems, NewConnector())
+		}
 	}
 
-	return nil, fmt.Errorf("cannot display model: %s", m)
+	return NewLayout(elems), nil
 }

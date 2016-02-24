@@ -6,8 +6,14 @@ import "github.com/ziel/tim/timerror"
 
 // todo: docs
 type Model interface {
+
+	// todo: docs
 	FilePaths() []string
+
+	// todo: docs
 	MergeRight() error
+
+	// todo: docs
 	MergeLeft() error
 }
 
