@@ -24,13 +24,13 @@ var controller *state
 // todo: docs
 func Init(paths []string) error {
 	cModel, err := model.Factory(paths)
-
 	if err != nil {
 		return err
 	}
 
-	cView, err := view.Factory(cModel)
+	defer cModel.Close()
 
+	cView, err := view.Factory(paths)
 	if err != nil {
 		return err
 	}
@@ -40,27 +40,17 @@ func Init(paths []string) error {
 		view:  cView,
 	}
 
-	controller.init()
-	return nil
+	return controller.loop()
 }
 
 // todo: docs
-func (s *state) init() {
+func (s *state) loop() error {
 	if err := termbox.Init(); err != nil {
-		panic(err)
+		return err
 	}
 
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputAlt)
-
-	if err := s.eventLoop(); err != nil {
-		panic(err)
-	}
-}
-
-// todo: docs
-func (s *state) eventLoop() error {
-	s.wg.Add(2)
 
 	events := s.eventProducer()
 	result := s.eventConsumer(events)
@@ -73,6 +63,8 @@ func (s *state) eventLoop() error {
 func (s *state) eventProducer() <-chan termbox.Event {
 	const bufsize int = 10
 	events := make(chan termbox.Event, bufsize)
+
+	s.wg.Add(1)
 
 	go func() {
 		defer s.wg.Done()
@@ -92,6 +84,8 @@ func (s *state) eventProducer() <-chan termbox.Event {
 // todo: docs
 func (s *state) eventConsumer(events <-chan termbox.Event) <-chan error {
 	result := make(chan error)
+
+	s.wg.Add(1)
 
 	go func() {
 		defer s.wg.Done()

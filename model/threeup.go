@@ -2,19 +2,12 @@ package model
 
 // todo: docs
 type ThreeUp struct {
-	filePaths [3]string
+	files [3]*File
 }
 
 // todo: docs
 func NewThreeUp(path1, path2, path3 string) *ThreeUp {
-	return &ThreeUp{
-		filePaths: [3]string{path1, path2, path3},
-	}
-}
-
-// todo: docs
-func (tu *ThreeUp) FilePaths() []string {
-	return tu.filePaths[:]
+	return nil
 }
 
 // todo: docs

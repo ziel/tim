@@ -2,19 +2,12 @@ package model
 
 // todo: docs
 type TwoUp struct {
-	filePaths [2]string
+	files [2]*File
 }
 
 // todo: docs
 func NewTwoUp(path1, path2 string) *TwoUp {
-	return &TwoUp{
-		filePaths: [2]string{path1, path2},
-	}
-}
-
-// todo: docs
-func (tu *TwoUp) FilePaths() []string {
-	return tu.filePaths[:]
+	return nil
 }
 
 // todo: docs
