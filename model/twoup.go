@@ -1,13 +1,26 @@
 package model
 
+import "fmt"
+
 // todo: docs
 type TwoUp struct {
-	files [2]*File
+	*base
 }
 
 // todo: docs
-func NewTwoUp(path1, path2 string) *TwoUp {
-	return nil
+func newTwoUp(paths []string) (*TwoUp, error) {
+	if len(paths) != 2 {
+		msg := "TwoUp Model needs exactly 3 files. have: %d"
+		return nil, fmt.Errorf(msg, len(paths))
+	}
+
+	base, err := newBase(paths)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &TwoUp{base: base}, nil
 }
 
 // todo: docs
