@@ -3,6 +3,7 @@
 package control
 
 import (
+	"log"
 	"sync"
 
 	"github.com/nsf/termbox-go"
@@ -28,7 +29,11 @@ func Init(paths []string) error {
 		return err
 	}
 
-	defer cModel.Close()
+	defer func() {
+		if err := cModel.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	cView, err := view.Factory(paths)
 	if err != nil {
