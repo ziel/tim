@@ -51,6 +51,18 @@ func Init(paths []string) error {
 }
 
 // todo: docs
+func (s *state) addCleaner(fn func()) {
+	s.cleaners = append(s.cleaners, fn)
+}
+
+// todo: docs
+func (s *state) cleanup() {
+	for _, fn := range s.cleaners {
+		fn()
+	}
+}
+
+// todo: docs
 func (s *state) initModel(paths []string) error {
 	mdl, err := model.Factory(paths)
 	if err != nil {
@@ -80,27 +92,6 @@ func (s *state) initView(paths []string) error {
 }
 
 // todo: docs
-func (s *state) addCleaner(fn func()) {
-	s.cleaners = append(s.cleaners, fn)
-}
-
-// todo: docs
-func (s *state) cleanup() {
-	for _, fn := range s.cleaners {
-		fn()
-	}
-}
-
-// todo: docs
-func (s *state) loop() error {
-	events := s.eventProducer()
-	result := s.eventConsumer(events)
-
-	s.waitGroup.Wait()
-	return <-result
-}
-
-// todo: docs
 func (s *state) initTermbox() error {
 	if err := termbox.Init(); err != nil {
 		return err
@@ -113,6 +104,15 @@ func (s *state) initTermbox() error {
 
 	w, h := termbox.Size()
 	return s.view.Update(w, h)
+}
+
+// todo: docs
+func (s *state) loop() error {
+	events := s.eventProducer()
+	result := s.eventConsumer(events)
+
+	s.waitGroup.Wait()
+	return <-result
 }
 
 // todo: docs
