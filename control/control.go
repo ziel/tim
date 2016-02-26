@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	"github.com/nsf/termbox-go"
+	"github.com/ziel/tim/control/errors"
 	"github.com/ziel/tim/model"
-	"github.com/ziel/tim/timerror"
 	"github.com/ziel/tim/view"
 )
 
@@ -100,7 +100,7 @@ func (s *state) eventConsumer(events <-chan termbox.Event) <-chan error {
 
 			if err := s.handle(<-events); err != nil {
 				switch err {
-				case timerror.Quit:
+				case errors.Quit:
 					close(result)
 					termbox.Interrupt()
 

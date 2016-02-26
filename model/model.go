@@ -2,7 +2,7 @@
 //
 package model
 
-import "github.com/ziel/tim/timerror"
+import "github.com/ziel/tim/model/errors"
 
 // todo: docs
 type Model interface {
@@ -27,12 +27,12 @@ type Model interface {
 func Factory(files []string) (Model, error) {
 	switch len(files) {
 	case 0, 1:
-		return nil, timerror.TooFewFiles
+		return nil, errors.TooFewFiles
 	case 2:
 		return newTwoUp(files)
 	case 3:
 		return newThreeUp(files)
 	}
 
-	return nil, timerror.TooManyFiles
+	return nil, errors.TooManyFiles
 }

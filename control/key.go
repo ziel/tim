@@ -2,14 +2,14 @@ package control
 
 import (
 	"github.com/nsf/termbox-go"
-	"github.com/ziel/tim/timerror"
+	"github.com/ziel/tim/control/errors"
 )
 
 // todo: docs
 func (s *state) key(event termbox.Event) error {
 	switch event.Key {
 	case termbox.KeyCtrlC:
-		return timerror.Quit
+		return errors.Quit
 
 	case termbox.KeyArrowUp:
 		// todo: s.view.scrollUp
@@ -26,7 +26,7 @@ func (s *state) key(event termbox.Event) error {
 
 	switch event.Ch {
 	case 'q':
-		return timerror.Quit
+		return errors.Quit
 
 	case 'k':
 		// todo: s.view.scrollUp
