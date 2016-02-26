@@ -14,7 +14,7 @@ type Connector struct {
 
 // Width needed to draw a connector.
 //
-const ConnectorWidth = 3
+const ConnectorWidth = 1
 
 func NewConnector() *Connector {
 	return &Connector{}
@@ -45,5 +45,6 @@ func (c *Connector) WidthConstraints() (int, int) {
 // Implementation for Element
 //
 func (c *Connector) Draw() {
-	// todo
+	// todo: draw connections
+	clearRegion(c.rect.X0+1, c.rect.X1-1, c.rect.Y0, c.rect.Y1)
 }

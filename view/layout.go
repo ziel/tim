@@ -66,7 +66,7 @@ func (l *Layout) Update(width, height int) error {
 			return err
 		}
 
-		x0 = x1
+		x0 = x1 + 1
 	}
 
 	return nil
@@ -76,6 +76,8 @@ func (l *Layout) Draw() {
 	for _, el := range l.elements {
 		el.Draw()
 	}
+
+	termbox.Flush()
 }
 
 func (l *Layout) Resize(ev termbox.Event) error {
