@@ -1,6 +1,10 @@
 package view
 
-import "github.com/nsf/termbox-go"
+import (
+	"fmt"
+
+	"github.com/nsf/termbox-go"
+)
 
 // todo: docs
 type Layout struct {
@@ -15,11 +19,14 @@ type Layout struct {
 }
 
 func NewLayout(elements []Element) *Layout {
-	return &Layout{
+	result := &Layout{
 		nFlexibleElements: 0,
 		minWidth:          0,
 		elements:          elements,
 	}
+
+	result.init()
+	return result
 }
 
 func (l *Layout) init() {
@@ -39,12 +46,14 @@ func (l *Layout) init() {
 // todo: docs
 func widthForElement(width int, element Element) int {
 	if _, max := element.WidthConstraints(); max > 0 {
-		return max
+		if max < width {
+			return max
+		}
 	}
 	return width
 }
 
-func (l *Layout) Update(width, height int) {
+func (l *Layout) Update(width, height int) error {
 	available := width - l.minWidth
 	divided := available / l.nFlexibleElements
 
@@ -52,26 +61,32 @@ func (l *Layout) Update(width, height int) {
 
 	for _, e := range l.elements {
 		x1 := x0 + widthForElement(divided, e)
-		if _, max := e.WidthConstraints(); max > 0 {
-			x1 = x0 + max
-		} else {
-			x1 = x0 + divided
+
+		if err := e.SetRect(NewRect(x0, 0, x1, height)); err != nil {
+			return err
 		}
 
 		x0 = x1
 	}
 
-	//todo: update contained elements
-	// start with minimum layout
-	// divide available width among flexible elements
-	// expanding to fill
+	return nil
 }
 
 func (l *Layout) Draw() {
-	// todo: implement
+	for _, el := range l.elements {
+		el.Draw()
+	}
 }
 
 func (l *Layout) Resize(ev termbox.Event) error {
-	// todo: implement
+	if ev.Type != termbox.EventResize {
+		return fmt.Errorf("Resize called with non-resize event: %s", ev)
+	}
+
+	if err := l.Update(ev.Width, ev.Height); err != nil {
+		return err
+	}
+
+	l.Draw()
 	return nil
 }

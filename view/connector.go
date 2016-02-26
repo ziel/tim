@@ -1,6 +1,10 @@
 package view
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/ziel/tim/view/errors"
+)
 
 // todo: docs
 // Implements Element
@@ -20,8 +24,12 @@ func NewConnector() *Connector {
 //
 func (c *Connector) SetRect(rect *Rect) error {
 	if rect.Width() < ConnectorWidth {
-		es := "Connector width must be %d, got %d"
-		return fmt.Errorf(es, ConnectorWidth, rect.Width())
+		msg := fmt.Sprintf(
+			"connector width must be %d, got %d",
+			ConnectorWidth,
+			rect.Width())
+
+		return errors.LayoutError(msg)
 	}
 
 	c.rect = *rect

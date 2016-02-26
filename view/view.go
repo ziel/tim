@@ -11,18 +11,22 @@ type View interface {
 	Draw()
 
 	// todo: docs
+	Update(width, height int) error
+
+	// todo: docs
 	Resize(termbox.Event) error
 }
 
 // todo: docs
 func Factory(paths []string) (View, error) {
-	total := len(paths)
-	elems := make([]Element, total*2-1)
+	npaths := len(paths)
+	nelems := (npaths * 2) - 1
+	elems := make([]Element, 0, nelems)
 
 	for i, path := range paths {
 		elems = append(elems, NewTextPane(path))
 
-		if i < total {
+		if i < (npaths - 1) {
 			elems = append(elems, NewConnector())
 		}
 	}
