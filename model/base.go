@@ -24,7 +24,7 @@ func newBase(paths []string) (*base, error) {
 
 // todo: docs
 func (m *base) Paths() []string {
-	result := make([]string, len(m.files))
+	result := make([]string, 0, len(m.files))
 
 	for path := range m.files {
 		result = append(result, path)

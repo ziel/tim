@@ -2,7 +2,11 @@
 //
 package view
 
-import "github.com/nsf/termbox-go"
+import (
+	"github.com/nsf/termbox-go"
+	"github.com/ziel/tim/model"
+	"github.com/ziel/tim/view/errors"
+)
 
 // todo: docs
 type View interface {
@@ -18,8 +22,14 @@ type View interface {
 }
 
 // todo: docs
-func Factory(paths []string) (View, error) {
+func Factory(m model.Model) (View, error) {
+	if m == nil {
+		return nil, errors.NilModelError
+	}
+
+	paths := m.Paths()
 	npaths := len(paths)
+
 	nelems := (npaths * 2) - 1
 	elems := make([]Element, 0, nelems)
 

@@ -39,7 +39,7 @@ func Init(paths []string) error {
 		return err
 	}
 
-	if err := instance.initView(paths); err != nil {
+	if err := instance.initView(); err != nil {
 		return err
 	}
 
@@ -80,8 +80,8 @@ func (c *controller) initModel(paths []string) error {
 }
 
 // todo: docs
-func (c *controller) initView(paths []string) error {
-	viw, err := view.Factory(paths)
+func (c *controller) initView() error {
+	viw, err := view.Factory(c.model)
 
 	if err != nil {
 		return err
