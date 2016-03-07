@@ -13,7 +13,7 @@ import (
 )
 
 // todo: docs
-type state struct {
+type controller struct {
 	model     model.Model
 	view      view.View
 	waitGroup sync.WaitGroup
@@ -21,110 +21,116 @@ type state struct {
 }
 
 // todo: docs
-var controller *state
+var instance *controller
 
 // todo: docs
-func newController() *state {
-	return &state{
+func newController() *controller {
+	return &controller{
 		cleaners: make([]func(), 0),
 	}
 }
 
 // todo: docs
 func Init(paths []string) error {
-	controller = newController()
-	defer controller.cleanup()
+	instance = newController()
+	defer instance.cleanup()
 
-	if err := controller.initModel(paths); err != nil {
+	if err := instance.initModel(paths); err != nil {
 		return err
 	}
 
-	if err := controller.initView(paths); err != nil {
+	if err := instance.initView(paths); err != nil {
 		return err
 	}
 
-	if err := controller.initTermbox(); err != nil {
+	if err := instance.initTermbox(); err != nil {
 		return err
 	}
 
-	return controller.loop()
+	return instance.loop()
 }
 
 // todo: docs
-func (s *state) addCleaner(fn func()) {
-	s.cleaners = append(s.cleaners, fn)
+func (c *controller) addCleaner(fn func()) {
+	c.cleaners = append(c.cleaners, fn)
 }
 
 // todo: docs
-func (s *state) cleanup() {
-	for _, fn := range s.cleaners {
+func (c *controller) cleanup() {
+	for _, fn := range c.cleaners {
 		fn()
 	}
 }
 
 // todo: docs
-func (s *state) initModel(paths []string) error {
+func (c *controller) initModel(paths []string) error {
 	mdl, err := model.Factory(paths)
 	if err != nil {
 		return err
 	}
 
-	s.addCleaner(func() {
+	c.addCleaner(func() {
 		if err := mdl.Close(); err != nil {
 			log.Println(err)
 		}
 	})
 
-	s.model = mdl
+	c.model = mdl
 	return nil
 }
 
 // todo: docs
-func (s *state) initView(paths []string) error {
+func (c *controller) initView(paths []string) error {
 	viw, err := view.Factory(paths)
 
 	if err != nil {
 		return err
 	}
 
-	s.view = viw
+	c.view = viw
 	return nil
 }
 
 // todo: docs
-func (s *state) initTermbox() error {
+func (c *controller) initTermbox() error {
 	if err := termbox.Init(); err != nil {
 		return err
 	}
 
-	s.addCleaner(termbox.Close)
+	c.addCleaner(termbox.Close)
 
 	termbox.SetInputMode(termbox.InputAlt)
 	termbox.Flush()
 
 	w, h := termbox.Size()
-	return s.view.Update(w, h)
+	return c.view.Update(w, h)
 }
 
 // todo: docs
-func (s *state) loop() error {
-	events := s.eventProducer()
-	result := s.eventConsumer(events)
+func (c *controller) loop() error {
+	events := c.eventProducer()
+	result := c.eventConsumer(events)
 
-	s.waitGroup.Wait()
+	c.waitGroup.Wait()
 	return <-result
 }
 
 // todo: docs
-func (s *state) eventProducer() <-chan termbox.Event {
+func (c *controller) activateGoroutine(fn func()) {
+	c.waitGroup.Add(1)
+
+	go func() {
+		defer c.waitGroup.Done()
+		fn()
+	}()
+}
+
+// todo: docs
+func (c *controller) eventProducer() <-chan termbox.Event {
 	const bufsize int = 10
 	events := make(chan termbox.Event, bufsize)
 
-	s.waitGroup.Add(1)
-
-	go func() {
-		defer s.waitGroup.Done()
-
+	c.activateGoroutine(func() {
 		for {
 			ev := termbox.PollEvent()
 			if ev.Type == termbox.EventInterrupt {
@@ -132,24 +138,20 @@ func (s *state) eventProducer() <-chan termbox.Event {
 			}
 			events <- ev
 		}
-	}()
+	})
 
 	return events
 }
 
 // todo: docs
-func (s *state) eventConsumer(events <-chan termbox.Event) <-chan error {
+func (c *controller) eventConsumer(events <-chan termbox.Event) <-chan error {
 	result := make(chan error, 1)
 
-	s.waitGroup.Add(1)
-
-	go func() {
-		defer s.waitGroup.Done()
-
+	c.activateGoroutine(func() {
 		for {
-			s.view.Draw()
+			c.view.Draw()
 
-			if err := s.handle(<-events); err != nil {
+			if err := c.handle(<-events); err != nil {
 				if err != errors.Quit {
 					result <- err
 				}
@@ -160,19 +162,19 @@ func (s *state) eventConsumer(events <-chan termbox.Event) <-chan error {
 				return
 			}
 		}
-	}()
+	})
 
 	return result
 }
 
 // todo: docs
-func (s *state) handle(event termbox.Event) error {
+func (c *controller) handle(event termbox.Event) error {
 	switch event.Type {
 	case termbox.EventKey:
-		return s.key(event)
+		return c.key(event)
 
 	case termbox.EventResize:
-		return s.view.Resize(event)
+		return c.view.Resize(event)
 
 	case termbox.EventError:
 		return event.Err

@@ -6,22 +6,22 @@ import (
 )
 
 // todo: docs
-func (s *state) key(event termbox.Event) error {
+func (c *controller) key(event termbox.Event) error {
 	switch event.Key {
 	case termbox.KeyCtrlC:
 		return errors.Quit
 
 	case termbox.KeyArrowUp:
-		// todo: s.view.scrollUp
+		// todo: c.view.scrollUp
 
 	case termbox.KeyArrowDown:
-		// todo: s.view.scrollUp
+		// todo: c.view.scrollUp
 
 	case termbox.KeyArrowLeft:
-		s.model.MergeLeft()
+		c.model.MergeLeft()
 
 	case termbox.KeyArrowRight:
-		s.model.MergeRight()
+		c.model.MergeRight()
 	}
 
 	switch event.Ch {
@@ -29,16 +29,16 @@ func (s *state) key(event termbox.Event) error {
 		return errors.Quit
 
 	case 'k':
-		// todo: s.view.scrollUp
+		// todo: c.view.scrollUp
 
 	case 'j':
-		// todo: s.view.scrollUp
+		// todo: c.view.scrollUp
 
 	case 'h':
-		s.model.MergeLeft()
+		c.model.MergeLeft()
 
 	case 'l':
-		s.model.MergeRight()
+		c.model.MergeRight()
 	}
 
 	return nil
