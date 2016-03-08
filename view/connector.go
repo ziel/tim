@@ -3,6 +3,7 @@ package view
 import (
 	"fmt"
 
+	"github.com/nsf/termbox-go"
 	"github.com/ziel/tim/view/errors"
 )
 
@@ -44,7 +45,12 @@ func (c *Connector) WidthConstraints() (int, int) {
 
 // Implementation for Element
 //
+// todo: move double connector height into general view stuff
+// todo: add individual connector drawing
+//
 func (c *Connector) Draw() {
-	// todo: draw connections
-	clearRegion(c.rect.X0+1, c.rect.X1-1, c.rect.Y0, c.rect.Y1)
+	lineVertical(c.rect.X0, c.rect.Y0, c.rect.Y1)
+
+	fg, bg := lineColor()
+	termbox.SetCell(c.rect.X0, c.rect.Y0+1, '╪', fg, bg)
 }

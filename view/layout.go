@@ -53,10 +53,11 @@ func widthForElement(width int, element Element) int {
 	return width
 }
 
+// todo: docs
+// todo: err when sufficient space is unavailable?
+//
 func (l *Layout) Update(width, height int) error {
-	available := width - l.minWidth
-	divided := available / l.nFlexibleElements
-
+	divided := width / l.nFlexibleElements
 	x0 := 0
 
 	for _, e := range l.elements {
@@ -66,7 +67,7 @@ func (l *Layout) Update(width, height int) error {
 			return err
 		}
 
-		x0 = x1 + 1
+		x0 = x1
 	}
 
 	return nil
