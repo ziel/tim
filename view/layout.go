@@ -85,6 +85,8 @@ func (l *Layout) Resize(ev termbox.Event) error {
 		return fmt.Errorf("Resize called with non-resize event: %s", ev)
 	}
 
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+
 	if err := l.Update(ev.Width, ev.Height); err != nil {
 		return err
 	}
